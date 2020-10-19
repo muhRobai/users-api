@@ -3,7 +3,7 @@ package restapi
 import (
 	"time"
 
-	"github.com/jackc/pgx"
+	"github.com/jackc/pgx/v4"
 )
 
 type GetUsers struct {
@@ -22,7 +22,7 @@ type User struct {
 }
 
 type InitAPI struct {
-	Db *pgx.ConnPool
+	Db *pgx.Conn
 }
 
 type UserId struct {

@@ -23,7 +23,7 @@ func main() {
 	httpHanler := api.StartHttp()
 	srv := &http.Server{
 		Handler:      httpHanler,
-		Addr:         ":3000",
+		Addr:         ":80",
 		WriteTimeout: 10 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}

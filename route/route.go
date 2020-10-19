@@ -5,41 +5,41 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/gorilla/mux"
 
-	"github.com/jackc/pgx"
+	"github.com/jackc/pgx/v4"
 )
 
 func (c *InitAPI) initDb() {
-	dbHost := "127.0.0.1"
-	dbPass := "root"
-	dbName := "postgres"
-	dbPort := "5432"
-	dbUser := "postgres"
+	// dbHost := "127.0.0.1"
+	// dbPass := "root"
+	// dbName := "postgres"
+	// dbPort := "5432"
+	// dbUser := "postgres"
 
-	port, err := strconv.Atoi(dbPort)
-	if err != nil {
-		log.Println(err)
-		return
-	}
+	// port, err := strconv.Atoi(dbPort)
+	// if err != nil {
+	// 	log.Println(err)
+	// 	return
+	// }
 
-	dbConfig := &pgx.ConnConfig{
-		Port:     uint16(port),
-		Host:     dbHost,
-		User:     dbUser,
-		Password: dbPass,
-		Database: dbName,
-	}
+	// dbConfig := &pgx.ConnConfig{
+	// 	Port:     uint16(port),
+	// 	Host:     dbHost,
+	// 	User:     dbUser,
+	// 	Password: dbPass,
+	// 	Database: dbName,
+	// }
 
-	connection := pgx.ConnPoolConfig{
-		ConnConfig:     *dbConfig,
-		MaxConnections: 5,
-	}
-
-	c.Db, err = pgx.NewConnPool(connection)
+	// connection := pgx.ConnPoolConfig{
+	// 	ConnConfig:     *dbConfig,
+	// 	MaxConnections: 5,
+	// }
+	var err error
+	var url = "postgres://elnbxzcj:EhKpzdq9m8jvluh8o8KgXgrH5JFBnD0x@drona.db.elephantsql.com:5432/elnbxzcj"
+	c.Db, err = pgx.Connect(context.Background(), url)
 	if err != nil {
 		log.Println(err)
 		return

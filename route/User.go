@@ -16,7 +16,7 @@ func (c *InitAPI) ListUser(ctx context.Context, req *GetUsers) (*GetUsers, error
 		limit = int(req.Limit)
 	}
 
-	rows, err := c.Db.Query(`
+	rows, err := c.Db.Query(ctx, `
 		SELECT id, 
 			username, 
 			email,
@@ -82,7 +82,7 @@ func (c *InitAPI) CreateUser(ctx context.Context, req *User, rolesId string) (*U
 	}
 
 	status := strconv.Itoa(req.Status)
-	err = c.Db.QueryRow(`INSERT INTO users (username, email, status, role_id, updated_at) VALUES ($1, $2, $3, $4, $5) RETURNING id`,
+	err = c.Db.QueryRow(ctx, `INSERT INTO users (username, email, status, role_id, updated_at) VALUES ($1, $2, $3, $4, $5) RETURNING id`,
 		req.Username, req.Email, status, "uuid-ngarang", time.Now().Format("RFC3339")).Scan(&id)
 	if err != nil {
 		log.Println(err)
@@ -96,7 +96,7 @@ func (c *InitAPI) CreateUser(ctx context.Context, req *User, rolesId string) (*U
 
 func (c *InitAPI) GetRoles(id string) (string, error) {
 	var roles string
-	err := c.Db.QueryRow(`SELECT roles FROM roles WHERE id = $1`, id).Scan(&roles)
+	err := c.Db.QueryRow(context.Background(), `SELECT roles FROM roles WHERE id = $1`, id).Scan(&roles)
 	if err != nil {
 		log.Println(err)
 		return "", err
