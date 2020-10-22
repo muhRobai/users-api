@@ -1,6 +1,7 @@
 package restapi
 
 import (
+	"io"
 	"time"
 
 	"github.com/jackc/pgx/v4"
@@ -31,4 +32,16 @@ type UserId struct {
 
 type UserName struct {
 	Name string `json:"name"`
+}
+
+type FileItem struct {
+	File     io.Reader
+	Filename string
+	FileSize int64
+	FileType string
+	UserId   string
+}
+
+type GetFile struct {
+	UserId string `json:"userId"`
 }

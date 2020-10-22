@@ -4,9 +4,11 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
+	"io"
 	"log"
+	"os"
 	"strconv"
-	"time"
 )
 
 func (c *InitAPI) ListUser(ctx context.Context, req *GetUsers) (*GetUsers, error) {
@@ -82,8 +84,8 @@ func (c *InitAPI) CreateUser(ctx context.Context, req *User, rolesId string) (*U
 	}
 
 	status := strconv.Itoa(req.Status)
-	err = c.Db.QueryRow(ctx, `INSERT INTO users (username, email, status, role_id, updated_at) VALUES ($1, $2, $3, $4, $5) RETURNING id`,
-		req.Username, req.Email, status, "uuid-ngarang", time.Now().Format("RFC3339")).Scan(&id)
+	err = c.Db.QueryRow(ctx, `INSERT INTO users (username, email, status, role_id) VALUES ($1, $2, $3, $4) RETURNING id`,
+		req.Username, req.Email, status, "uuid-ngarang").Scan(&id)
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -103,4 +105,74 @@ func (c *InitAPI) GetRoles(id string) (string, error) {
 	}
 
 	return roles, nil
+}
+
+func (c *InitAPI) GetCustomerById(id string) bool {
+	var userId string
+	err := c.Db.QueryRow(context.Background(), `SELECT username FROM users WHERE id = $1`, id).Scan(&userId)
+	if err != nil {
+		return false
+	}
+
+	return userId != ""
+}
+
+func (c *InitAPI) InsertProfilePhoto(ctx context.Context, req *FileItem) (*UserId, error) {
+	if !c.GetCustomerById(req.UserId) {
+		return nil, errors.New("user-not-found")
+	}
+
+	var profileId string
+	err := c.Db.QueryRow(ctx, `INSERT INTO profile_photo (user_id, filename, file_type, size) VALUES ($1, $2, $3, $4) RETURNING id`,
+		req.UserId, req.Filename, req.FileType, req.FileSize,
+	).Scan(&profileId)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	filename := fmt.Sprintf("assert/%s", req.Filename)
+
+	file, err := os.Create(filename)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	defer file.Close()
+	_, err = io.Copy(file, req.File)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	return &UserId{
+		Id: profileId,
+	}, nil
+}
+
+func (c *InitAPI) GetProfilePhotoById(id string) (string, string, error) {
+	var filename, fileType string
+	err := c.Db.QueryRow(context.Background(), `SELECT filename, file_type FROM profile_photo WHERE user_id = $1`, id).Scan(&filename, &fileType)
+
+	if err != nil {
+		log.Println(err)
+		return "", "", err
+	}
+
+	return filename, fileType, nil
+}
+
+func (c *InitAPI) GetProfilePhoto(ctx context.Context, req *GetFile) (io.Reader, string, error) {
+	filename, fileType, err := c.GetProfilePhotoById(req.UserId)
+	if err != nil {
+		return nil, "", nil
+	}
+	url := fmt.Sprintf("assert/%s", filename)
+	file, err := os.Open(url)
+	if err != nil {
+		log.Println(err)
+		return nil, "", err
+	}
+
+	return file, fileType, nil
 }
