@@ -22,3 +22,11 @@ CREATE TABLE roles (
 
 INSERT INTO roles (id, roles) VALUES ('00000000-0000-0000-0000-000000000001', 'ADMIN');
 INSERT INTO users (id, username, email, role_id, status) VALUES ('00000000-0000-0000-0000-000000000002', 'bambang', 'bambang@getnada.com', '00000000-0000-0000-0000-000000000001', 'ACTIVE');
+
+CREATE TABLE profile_photo (
+    id UUID NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id TEXT NOT NULL,
+    filename TEXT NOT NULL,
+    file_type TEXT NOT NULL,
+    size INT NOT NULL
+);
