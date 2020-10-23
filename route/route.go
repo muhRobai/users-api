@@ -38,7 +38,7 @@ func (c *InitAPI) initDb() {
 	// 	MaxConnections: 5,
 	// }
 	var err error
-	var url = "postgres://elnbxzcj:EhKpzdq9m8jvluh8o8KgXgrH5JFBnD0x@drona.db.elephantsql.com:5432/elnbxzcj"
+	var url = "postgres://tdwaspai:ThGq-16XbXx44fGrr_3ABrpOX29WyhDa@satao.db.elephantsql.com:5432/tdwaspai"
 	c.Db, err = pgx.Connect(context.Background(), url)
 	if err != nil {
 		log.Println(err)
